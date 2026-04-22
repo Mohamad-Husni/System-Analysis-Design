@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <style>
+      .bg { fill: #0d1117; }
+      .box { fill: #0d1117; stroke: #00f0ff; stroke-width: 2; }
+      .text-main { fill: #ffffff; font-family: 'Inter', monospace; font-size: 14px; font-weight: bold; text-anchor: middle; }
+      .line { stroke: #00f0ff; stroke-width: 2; fill: none; }
+    </style>
+  </defs>
+
+  <rect width="100%" height="100%" class="bg" />
+  
+  <text x="400" y="40" class="text-main" style="font-size: 20px;">Top-Down System Structure</text>
+
+  <!-- Root -->
+  <rect x="300" y="80" width="200" height="50" class="box" />
+  <text x="400" y="110" class="text-main">Inventory Tracking System</text>
+
+  <!-- Level 1 -->
+  <rect x="50" y="200" width="150" height="50" class="box" />
+  <text x="125" y="230" class="text-main">Inventory Module</text>
+
+  <rect x="225" y="200" width="150" height="50" class="box" />
+  <text x="300" y="230" class="text-main">Sales Module</text>
+
+  <rect x="425" y="200" width="150" height="50" class="box" />
+  <text x="500" y="230" class="text-main">Reporting Module</text>
+
+  <rect x="600" y="200" width="150" height="50" class="box" />
+  <text x="675" y="230" class="text-main">User Management</text>
+
+  <!-- Connectors -->
+  <path d="M 400 130 L 400 160 L 125 160 L 125 200" class="line" />
+  <path d="M 400 160 L 300 160 L 300 200" class="line" />
+  <path d="M 400 160 L 500 160 L 500 200" class="line" />
+  <path d="M 400 160 L 675 160 L 675 200" class="line" />
+
+  <!-- Level 2 (Sub-modules) -->
+  <!-- Under Inventory -->
+  <rect x="25" y="320" width="90" height="40" class="box" />
+  <text x="70" y="345" class="text-main" style="font-size: 10px;">QR Scanning</text>
+  
+  <rect x="130" y="320" width="90" height="40" class="box" />
+  <text x="175" y="345" class="text-main" style="font-size: 10px;">Stock Alerts</text>
+
+  <path d="M 125 250 L 125 280 L 70 280 L 70 320" class="line" />
+  <path d="M 125 280 L 175 280 L 175 320" class="line" />
+
+</svg>

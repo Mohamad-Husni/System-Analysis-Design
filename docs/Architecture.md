@@ -7,6 +7,8 @@ The Mistravora Core system utilizes a decoupled, modern architecture designed to
 - **Context DFD:** `../diagrams/Context_DFD.svg` - Maps the system boundary and external entities (Customer, Supplier, Manager).
 - **UML Class Diagram:** `../diagrams/UML_Class_Diagram.svg` - Details the object-oriented structure (Product, Customer, Supplier, Sales Order, Order Item, User).
 - **Sequence Diagram:** `../diagrams/Sequence_Diagram.svg` - Outlines the system communication flow for order fulfillment.
+- **Use Case Diagram:** `../diagrams/Use_Case_Diagram.svg` - Visualizes user interactions with system functions.
+- **Top-Down Structure:** `../diagrams/Top_Down_Structure.svg` - Hierarchical breakdown of system modules.
 
 ## 2. Technical Specifications: Data Dictionary
 

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <style>
+      .bg { fill: #0d1117; }
+      .actor { fill: none; stroke: #ff0000; stroke-width: 2; }
+      .usecase { fill: #00f0ff; fill-opacity: 0.1; stroke: #00f0ff; stroke-width: 2; }
+      .text-main { fill: #ffffff; font-family: 'Inter', monospace; font-size: 14px; font-weight: bold; text-anchor: middle; }
+      .text-actor { fill: #ff0000; font-family: 'Inter', monospace; font-size: 12px; font-weight: bold; text-anchor: middle; }
+      .line { stroke: #00f0ff; stroke-width: 1; fill: none; }
+      .system-boundary { fill: none; stroke: #30363d; stroke-width: 2; stroke-dasharray: 5,5; }
+    </style>
+  </defs>
+
+  <rect width="100%" height="100%" class="bg" />
+  
+  <text x="400" y="30" class="text-main" style="font-size: 20px;">System Use Case Diagram</text>
+
+  <!-- System Boundary -->
+  <rect x="200" y="50" width="400" height="500" class="system-boundary" />
+  <text x="400" y="70" class="text-label" style="fill: #8b949e;">Inventory System</text>
+
+  <!-- Actors -->
+  <!-- Customer -->
+  <g transform="translate(100, 150)">
+    <circle cx="0" cy="-20" r="10" class="actor" />
+    <line x1="0" y1="-10" x2="0" y2="20" class="actor" />
+    <line x1="-15" y1="0" x2="15" y2="0" class="actor" />
+    <line x1="0" y1="20" x2="-10" y2="40" class="actor" />
+    <line x1="0" y1="20" x2="10" y2="40" class="actor" />
+    <text x="0" y="60" class="text-actor">Customer</text>
+  </g>
+
+  <!-- Staff -->
+  <g transform="translate(100, 350)">
+    <circle cx="0" cy="-20" r="10" class="actor" />
+    <line x1="0" y1="-10" x2="0" y2="20" class="actor" />
+    <line x1="-15" y1="0" x2="15" y2="0" class="actor" />
+    <line x1="0" y1="20" x2="-10" y2="40" class="actor" />
+    <line x1="0" y1="20" x2="10" y2="40" class="actor" />
+    <text x="0" y="60" class="text-actor">Staff</text>
+  </g>
+
+  <!-- Manager -->
+  <g transform="translate(700, 250)">
+    <circle cx="0" cy="-20" r="10" class="actor" />
+    <line x1="0" y1="-10" x2="0" y2="20" class="actor" />
+    <line x1="-15" y1="0" x2="15" y2="0" class="actor" />
+    <line x1="0" y1="20" x2="-10" y2="40" class="actor" />
+    <line x1="0" y1="20" x2="10" y2="40" class="actor" />
+    <text x="0" y="60" class="text-actor">Manager</text>
+  </g>
+
+  <!-- Use Cases -->
+  <ellipse cx="400" cy="120" rx="80" ry="25" class="usecase" />
+  <text x="400" y="125" class="text-main">Login</text>
+
+  <ellipse cx="400" cy="190" rx="80" ry="25" class="usecase" />
+  <text x="400" y="195" class="text-main">Place Order</text>
+
+  <ellipse cx="400" cy="260" rx="80" ry="25" class="usecase" />
+  <text x="400" y="265" class="text-main">Scan QR Code</text>
+
+  <ellipse cx="400" cy="330" rx="80" ry="25" class="usecase" />
+  <text x="400" y="335" class="text-main">Update Stock</text>
+
+  <ellipse cx="400" cy="400" rx="80" ry="25" class="usecase" />
+  <text x="400" y="405" class="text-main">View Inventory</text>
+
+  <ellipse cx="400" cy="470" rx="80" ry="25" class="usecase" />
+  <text x="400" y="475" class="text-main">Generate Reports</text>
+
+  <!-- Associations -->
+  <line x1="115" y1="150" x2="320" y2="120" class="line" />
+  <line x1="115" y1="150" x2="320" y2="190" class="line" />
+
+  <line x1="115" y1="350" x2="320" y2="120" class="line" />
+  <line x1="115" y1="350" x2="320" y2="260" class="line" />
+  <line x1="115" y1="350" x2="320" y2="330" class="line" />
+  <line x1="115" y1="350" x2="320" y2="400" class="line" />
+
+  <line x1="685" y1="250" x2="480" y2="120" class="line" />
+  <line x1="685" y1="250" x2="480" y2="400" class="line" />
+  <line x1="685" y1="250" x2="480" y2="470" class="line" />
+
+</svg>
