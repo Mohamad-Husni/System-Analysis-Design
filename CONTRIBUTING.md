@@ -1,5 +1,3 @@
-# Contributing to Mistravora Core
-
 Thank you for your interest in contributing to the **Mistravora Core** system! This project orchestrates the automated future of RT & DK Consumers' inventory framework.
 
 ## The Robotic Vision
