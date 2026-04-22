@@ -1,0 +1,32 @@
+{
+  "name": "system-analysis-design",
+  "version": "1.0.0",
+  "description": "<div align=\"center\">   <img src=\"https://img.shields.io/badge/System-Robotic_Laboratory-00f0ff?style=for-the-badge&logo=appveyor\" alt=\"Robotic Laboratory Theme\" />   <img src=\"https://img.shields.io/badge/Status-Production_Ready-ff0000?style=for-the-badge&logo=opsgenie\" alt=\"Status\" /> </div>",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mohamad-Husni/System-Analysis-Design.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mohamad-Husni/System-Analysis-Design/issues"
+  },
+  "homepage": "https://github.com/Mohamad-Husni/System-Analysis-Design#readme",
+  "dependencies": {
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.3"
+  }
+}

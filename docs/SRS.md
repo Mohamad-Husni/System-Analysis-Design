@@ -1,55 +1,62 @@
 # System Requirements Specification (SRS)
 
-## 1. Problem Statement
+## 1. Introduction & Problem Statement
 
-Recent staff surveys at **RT & DK Consumers** have brought critical operational deficiencies to light. The current reliance on manual, spreadsheet-driven processes has resulted in:
+**RT & DK Consumers (Pvt) Ltd** is a private company specializing in the supply of plastic essentials. Recent fact-finding surveys, interviews, and observations have highlighted critical operational deficiencies stemming from their current manual and Excel-based processes:
 
-1. **2-Hour Stock Check Delays:** Warehouse and floor staff are experiencing unacceptable lag times when attempting to verify current stock levels, crippling customer service responsiveness and daily operational velocity.
-2. **Manual Entry Errors:** The manual transcription of stock deliveries and dispatch logs into Excel has introduced severe data integrity issues, leading to mismatched physical and digital inventories.
+1. **Inaccuracies & Manual Entry Errors:** 73% of staff reported daily stock discrepancies, with 61% explicitly citing manual data entry as the root cause.
+2. **Operational Delays:** Order processing currently takes 20–30 minutes per order, and completing a full stock check can take up to 2 hours.
+3. **Stockouts & Customer Dissatisfaction:** There is no alert system, meaning products frequently run out unexpectedly before staff are aware, leading to delayed approvals and unhappy customers.
 
-This system is engineered to eradicate these bottlenecks via full automation and real-time tracking.
+This proposed **Automated Inventory Tracking System** is engineered to eradicate these bottlenecks via full automation, barcode/QR scanning, real-time tracking, and automated reporting.
 
 ## 2. SDLC Model: The Incremental Model
 
 The development of the Mistravora Core system explicitly follows the **Incremental Model**. 
 
-This chosen development path ensures that a core, working subset of the system (e.g., base inventory tracking) is deployed rapidly, yielding immediate operational benefits. Subsequent modules (e.g., predictive ordering, advanced reporting) will be integrated in successive, iterative increments. This mitigates risk and ensures that RT & DK Consumers see immediate value while the system evolves in a controlled, predictable manner.
+This approach is best suited for RT & DK Consumers because it allows the development of the most important features first (e.g., barcode scanning, real-time stock updates, and low-stock alerts) so the system can start providing value quickly. Additional features (like advanced reporting) can be added in later increments, making it easier and less expensive to adapt to any necessary changes over time.
 
 ## 3. Logic Layer Technical Specifications
-
-The system's core business logic dictates how stock is verified and orders are processed.
 
 ### 3.1 Structured English
 
 ```text
-BEGIN PROCESS Order_Fulfillment
-  READ Customer_Order
-  FOR EACH Item IN Customer_Order
-    CHECK Inventory_Database FOR Item.Quantity
-    IF Inventory_Database.Quantity >= Item.Quantity THEN
-      ALLOCATE Item.Quantity TO Customer_Order
-      UPDATE Inventory_Database.Quantity = Inventory_Database.Quantity - Item.Quantity
-      LOG Transaction(Item, "Allocated")
+PROCESS Automated Inventory Tracking System
+BEGIN 
+FOR each Customer Order
+    IF stock is available
+        THEN generate Invoice
+        AND confirm Order to Customer
+        AND update Stock
     ELSE
-      MARK Item AS "Backordered"
-      TRIGGER Supplier_Reorder_Alert(Item)
-    END IF
-  END FOR
-  GENERATE Dispatch_Note
-END PROCESS
+        Notify Manager of Stockout
+        AND trigger Purchase Order to Supplier
+    ENDIF
+END FOR
+
+FOR each Supplier Delivery
+    Verify items received
+    Update Stock Records
+    Generate Supply Confirmation
+END FOR
+
+FOR each Manager Request
+    Generate Sales, Stock, and Performance Reports
+END FOR
+END
 ```
 
 ### 3.2 Decision Table
 
-**Process: Stock Level Action Determination**
+**Process: Inventory Action Determination**
 
 | Conditions | Rule 1 | Rule 2 | Rule 3 | Rule 4 |
 | :--- | :---: | :---: | :---: | :---: |
-| Stock > Reorder Level | Y | N | N | N |
-| Stock == 0 (Stockout) | N | N | Y | Y |
-| Pending Reorder exists? | - | Y | Y | N |
+| C1: Stock Available | Y | N | - | - |
+| C2: Supplier Delivery Arrived | - | - | Y | - |
+| C3: Manager Requests Report | - | - | - | Y |
 | **Actions** | | | | |
-| Fulfill Normal Order | X | X | | |
-| Notify Restock Needed | | | | X |
-| Place Urgent Reorder | | | | X |
-| Notify Customer Backorder| | | X | X |
+| A1: Confirm Order (Generate Invoice) | X | | | |
+| A2: Notify Manager (Stockout / PO) | | X | | |
+| A3: Update Stock | X | | X | |
+| A4: Generate Report | | | | X |

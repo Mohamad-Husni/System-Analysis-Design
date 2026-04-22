@@ -7,11 +7,11 @@
 
 <br />
 
-Welcome to the **Mistravora Core** System Analysis and Design repository for **RT & DK Consumers**. This repository serves as the high-level executive summary and complete architectural blueprint for our next-generation automated inventory management system.
+Welcome to the **Mistravora Core** System Analysis and Design repository for **RT & DK Consumers (Pvt) Ltd**. This repository serves as the high-level executive summary and complete architectural blueprint for our next-generation automated inventory management system.
 
 ## Executive Summary
 
-For too long, operations at RT & DK Consumers have been plagued by antiquated practices. Extensive staff surveys have highlighted critical operational bottlenecks, most notably **2-hour stock check delays** and pervasive **manual entry errors** stemming from reliance on spreadsheet-based tracking. 
+For too long, operations at RT & DK Consumers have been plagued by antiquated practices. Extensive staff surveys have highlighted critical operational bottlenecks, most notably that **73% of staff reported daily stock discrepancies**, with 61% citing manual data entry as the root cause. A full stock check takes up to 2 hours, and order processing suffers 20-30 minute delays.
 
 This project orchestrates the seamless transition from manual Excel operations to a fully automated, real-time inventory management ecosystem. By leveraging advanced architectural patterns and a cutting-edge "Robotic Laboratory" visual identity, Mistravora Core fundamentally transforms supply chain visibility, dramatically reducing latency and eliminating human error from the data entry process.
 
