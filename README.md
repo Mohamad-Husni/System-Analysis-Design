@@ -1,4 +1,4 @@
-#System Analysis & Design
+#<H1> System Analysis & Design </H1>
 
 <div align="center">
   <img src="https://img.shields.io/badge/System-Robotic_Laboratory-00f0ff?style=for-the-badge&logo=appveyor" alt="Robotic Laboratory Theme" />
