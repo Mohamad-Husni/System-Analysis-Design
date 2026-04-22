@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <style>
+      .bg { fill: #0d1117; }
+      .process { fill: #00f0ff; stroke: #00f0ff; stroke-width: 2; fill-opacity: 0.1; }
+      .entity { fill: #ff0000; stroke: #ff0000; stroke-width: 2; fill-opacity: 0.1; }
+      .text-main { fill: #ffffff; font-family: 'Inter', monospace; font-size: 16px; font-weight: bold; text-anchor: middle; }
+      .text-label { fill: #aaaaaa; font-family: 'Inter', monospace; font-size: 12px; text-anchor: middle; }
+      .line { stroke: #00f0ff; stroke-width: 2; marker-end: url(#arrow); fill: none; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#00f0ff" />
+    </marker>
+  </defs>
+  
+  <rect width="100%" height="100%" class="bg" />
+
+  <!-- Process -->
+  <circle cx="400" cy="200" r="80" class="process" />
+  <text x="400" y="195" class="text-main">Mistravora</text>
+  <text x="400" y="215" class="text-main">Core</text>
+  <text x="400" y="160" class="text-label">0.0</text>
+
+  <!-- Entities -->
+  <rect x="50" y="170" width="120" height="60" class="entity" />
+  <text x="110" y="205" class="text-main">Staff</text>
+
+  <rect x="630" y="70" width="120" height="60" class="entity" />
+  <text x="690" y="105" class="text-main">Customer</text>
+
+  <rect x="630" y="270" width="120" height="60" class="entity" />
+  <text x="690" y="305" class="text-main">Supplier</text>
+
+  <!-- Data Flows -->
+  <!-- Staff to System -->
+  <path d="M 170 190 L 310 190" class="line" />
+  <text x="240" y="180" class="text-label">Scan QR / Update Stock</text>
+  
+  <!-- System to Staff -->
+  <path d="M 310 210 L 170 210" class="line" />
+  <text x="240" y="230" class="text-label">Stock Status Display</text>
+
+  <!-- Customer to System -->
+  <path d="M 630 100 L 460 160" class="line" />
+  <text x="560" y="120" class="text-label">Order Details</text>
+
+  <!-- System to Customer -->
+  <path d="M 450 140 L 650 80" class="line" />
+  <text x="520" y="100" class="text-label">Invoice / Notification</text>
+
+  <!-- Supplier to System -->
+  <path d="M 630 300 L 460 240" class="line" />
+  <text x="560" y="290" class="text-label">Delivery Manifest</text>
+
+  <!-- System to Supplier -->
+  <path d="M 450 260 L 650 320" class="line" />
+  <text x="520" y="310" class="text-label">Purchase Order</text>
+
+</svg>

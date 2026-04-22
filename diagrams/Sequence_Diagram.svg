@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <style>
+      .bg { fill: #0d1117; }
+      .box { fill: #00f0ff; fill-opacity: 0.1; stroke: #00f0ff; stroke-width: 2; }
+      .text-title { fill: #ffffff; font-family: 'Inter', monospace; font-size: 16px; font-weight: bold; text-anchor: middle; }
+      .text-msg { fill: #aaaaaa; font-family: 'Inter', monospace; font-size: 14px; }
+      .line { stroke: #00f0ff; stroke-width: 2; stroke-dasharray: 5,5; }
+      .msg-line { stroke: #ffffff; stroke-width: 2; marker-end: url(#arrow); }
+      .return-line { stroke: #ff0000; stroke-width: 2; stroke-dasharray: 5,5; marker-end: url(#arrow-red); }
+      .rect-activation { fill: #00f0ff; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ffffff" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff0000" />
+    </marker>
+  </defs>
+
+  <rect width="100%" height="100%" class="bg" />
+
+  <!-- Lifeline headers -->
+  <rect x="50" y="50" width="120" height="40" class="box" />
+  <text x="110" y="75" class="text-title">Staff</text>
+  <line x1="110" y1="90" x2="110" y2="550" class="line" />
+
+  <rect x="250" y="50" width="120" height="40" class="box" />
+  <text x="310" y="75" class="text-title">QR Scanner</text>
+  <line x1="310" y1="90" x2="310" y2="550" class="line" />
+
+  <rect x="450" y="50" width="120" height="40" class="box" />
+  <text x="510" y="75" class="text-title">System Core</text>
+  <line x1="510" y1="90" x2="510" y2="550" class="line" />
+
+  <rect x="650" y="50" width="120" height="40" class="box" />
+  <text x="710" y="75" class="text-title">Database</text>
+  <line x1="710" y1="90" x2="710" y2="550" class="line" />
+
+  <!-- Activations -->
+  <rect x="305" y="120" width="10" height="380" class="rect-activation" />
+  <rect x="505" y="160" width="10" height="300" class="rect-activation" />
+  <rect x="705" y="200" width="10" height="220" class="rect-activation" />
+
+  <!-- Messages -->
+  <line x1="110" y1="130" x2="305" y2="130" class="msg-line" />
+  <text x="130" y="120" class="text-msg">1. Scans Product QR</text>
+
+  <line x1="315" y1="170" x2="505" y2="170" class="msg-line" />
+  <text x="330" y="160" class="text-msg">2. Send Product ID</text>
+
+  <line x1="515" y1="210" x2="705" y2="210" class="msg-line" />
+  <text x="530" y="200" class="text-msg">3. Query Stock Level</text>
+
+  <line x1="705" y1="250" x2="515" y2="250" class="return-line" />
+  <text x="530" y="240" class="text-msg" fill="#ff0000">4. Return Quantity</text>
+
+  <line x1="515" y1="300" x2="705" y2="300" class="msg-line" />
+  <text x="530" y="290" class="text-msg">5. Update Quantity (-1)</text>
+
+  <line x1="705" y1="350" x2="515" y2="350" class="return-line" />
+  <text x="530" y="340" class="text-msg" fill="#ff0000">6. Acknowledge Update</text>
+
+  <line x1="505" y1="400" x2="315" y2="400" class="return-line" />
+  <text x="330" y="390" class="text-msg" fill="#ff0000">7. Confirmation UI</text>
+
+  <line x1="305" y1="450" x2="110" y2="450" class="return-line" />
+  <text x="130" y="440" class="text-msg" fill="#ff0000">8. Display Success/Fail</text>
+
+</svg>
