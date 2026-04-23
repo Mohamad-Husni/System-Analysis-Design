@@ -1,194 +1,347 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
-// --- Types & Interfaces ---
-interface StockItem {
+// --- Types ---
+type View = 'DASHBOARD' | 'INVENTORY' | 'ORDERS' | 'ANALYTICS' | 'SETTINGS' | 'ALERTS';
+type Role = 'STAFF' | 'SUPERVISOR' | 'MANAGER';
+
+interface Product {
   id: string;
   name: string;
+  category: string;
   quantity: number;
-  status: 'optimal' | 'low' | 'out';
+  price: number;
+  reorderLevel: number;
   lastUpdated: string;
+  status: 'optimal' | 'warning' | 'critical';
+  expiryDate?: string;
 }
 
-// --- Mock Data ---
-const initialStock: StockItem[] = [
-  { id: 'RT-881A', name: 'Servo Motor Alpha', quantity: 45, status: 'optimal', lastUpdated: '10:04 AM' },
-  { id: 'DK-992B', name: 'Thermal Sensor Node', quantity: 12, status: 'low', lastUpdated: '09:15 AM' },
-  { id: 'RT-103C', name: 'Lithium Core Battery', quantity: 0, status: 'out', lastUpdated: '08:00 AM' },
-  { id: 'DK-554D', name: 'Actuator Assembly', quantity: 89, status: 'optimal', lastUpdated: '10:30 AM' },
+interface Order {
+  id: string;
+  customer: string;
+  total: number;
+  status: 'completed' | 'pending';
+  timestamp: string;
+}
+
+// --- Mock Data Generator ---
+const INITIAL_PRODUCTS: Product[] = [
+  { id: 'RTDK-100123', name: 'Plastic Water Jug (2L)', category: 'Kitchenware', quantity: 124, price: 450.00, reorderLevel: 50, lastUpdated: '12:45 PM', status: 'optimal', expiryDate: '2025-12-31' },
+  { id: 'RTDK-200567', name: 'Storage Bin Large', category: 'Home', quantity: 14, price: 1200.00, reorderLevel: 25, lastUpdated: '11:20 AM', status: 'critical', expiryDate: '2026-05-15' },
+  { id: 'RTDK-300789', name: 'Dining Plate Set', category: 'Kitchenware', quantity: 45, price: 850.00, reorderLevel: 40, lastUpdated: '10:05 AM', status: 'warning', expiryDate: '2025-09-20' },
+  { id: 'RTDK-400111', name: 'Garden Chair (Green)', category: 'Outdoor', quantity: 210, price: 2100.00, reorderLevel: 30, lastUpdated: '09:30 AM', status: 'optimal', expiryDate: '2027-01-10' },
 ];
 
-export default function RoboticDashboard() {
-  const [inventory, setInventory] = useState<StockItem[]>(initialStock);
-  const [scanning, setScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<string | null>(null);
+const RECENT_ORDERS: Order[] = [
+  { id: 'ORD-8821', customer: 'Nimal Perera', total: 4500.00, status: 'completed', timestamp: '10 mins ago' },
+  { id: 'ORD-8822', customer: 'Sunil Silva', total: 1250.00, status: 'pending', timestamp: '25 mins ago' },
+  { id: 'ORD-8823', customer: 'Kamal Gunaratne', total: 8900.00, status: 'completed', timestamp: '1 hour ago' },
+];
+
+export default function RTDKInventorySystem() {
+  const [currentView, setCurrentView] = useState<View>('DASHBOARD');
+  const [currentRole, setCurrentRole] = useState<Role>('MANAGER');
+  const [inventory, setInventory] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanLog, setScanLog] = useState<string[]>(['Neural System Online...', 'Awaiting neural link...']);
+  
+  // --- Access Control Logic ---
+  const canAccessView = (view: View) => {
+    if (currentRole === 'MANAGER') return true;
+    if (currentRole === 'SUPERVISOR') {
+      return ['DASHBOARD', 'INVENTORY', 'ORDERS', 'ALERTS'].includes(view);
+    }
+    return ['DASHBOARD', 'INVENTORY', 'ORDERS'].includes(view);
+  };
+
+  const restrictedViews: View[] = ['ANALYTICS', 'SETTINGS', 'ALERTS'];
+
+  // --- Derived Stats ---
+  const stats = useMemo(() => {
+    const totalItems = inventory.length;
+    const criticalItems = inventory.filter(p => p.status === 'critical').length;
+    const stockValue = inventory.reduce((acc, p) => acc + (p.price * p.quantity), 0);
+    return { totalItems, criticalItems, stockValue };
+  }, [inventory]);
 
   // --- Handlers ---
-  const handleSimulateScan = () => {
-    setScanning(true);
-    setScanResult(null);
-
+  const simulateScan = () => {
+    setIsScanning(true);
     setTimeout(() => {
-      // Simulate randomly scanning an item from the inventory and decrementing its stock
       const randomIdx = Math.floor(Math.random() * inventory.length);
-      const targetItem = inventory[randomIdx];
+      const target = inventory[randomIdx];
+      
+      setInventory(prev => prev.map((p, i) => {
+        if (i === randomIdx) {
+          const newQty = Math.max(0, p.quantity - 1);
+          return {
+            ...p,
+            quantity: newQty,
+            status: newQty === 0 ? 'critical' : newQty < p.reorderLevel ? 'warning' : 'optimal',
+            lastUpdated: 'JUST NOW'
+          };
+        }
+        return p;
+      }));
 
-      setInventory((prev) =>
-        prev.map((item, idx) => {
-          if (idx === randomIdx && item.quantity > 0) {
-            const newQty = item.quantity - 1;
-            return {
-              ...item,
-              quantity: newQty,
-              status: newQty === 0 ? 'out' : newQty < 15 ? 'low' : 'optimal',
-              lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            };
-          }
-          return item;
-        })
-      );
-
-      setScanResult(`Successfully logged outgoing unit: ${targetItem.name}`);
-      setScanning(false);
-    }, 1500);
+      setScanLog(prev => [`[LOG] Scanned: ${target.name} (-1 unit)`, ...prev].slice(0, 5));
+      setIsScanning(false);
+    }, 1200);
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white font-mono selection:bg-[#00f0ff] selection:text-black">
-    {/* Header */}
-    <header className="border-b border-[#00f0ff]/20 bg-[#0d0d14] px-8 py-4 flex items-center justify-between sticky top-0 z-50">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-sm bg-gradient-to-br from-[#00f0ff] to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.4)]">
-          <span className="text-black font-bold text-xl tracking-tighter">M</span>
+    <div className="flex h-screen bg-[#050508] text-[#e0e0e0] font-['Geist_Mono',monospace] overflow-hidden selection:bg-[#00f0ff] selection:text-black">
+      
+      {/* Sidebar Navigation */}
+      <aside className="w-64 border-r border-[#00f0ff]/10 bg-[#08080c] flex flex-col z-50">
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#00f0ff] to-[#0066ff] rounded-sm flex items-center justify-center shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+            <span className="text-black font-black text-2xl tracking-tighter">R</span>
+          </div>
+          <div>
+            <h1 className="text-sm font-bold tracking-[0.2em] uppercase text-white">RT & DK</h1>
+            <p className="text-[10px] text-[#00f0ff] tracking-[0.3em] font-bold">INVENTORY v2.1</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-lg font-bold tracking-widest text-white uppercase">Mistravora<span className="text-[#00f0ff]">Core</span></h1>
-          <p className="text-xs text-[#00f0ff]/70 tracking-[0.2em] uppercase">RT & DK Consumers Laboratory</p>
+
+        <nav className="flex-1 px-4 py-6 space-y-2">
+          <NavItem active={currentView === 'DASHBOARD'} onClick={() => setCurrentView('DASHBOARD')} icon="M13 10V3L4 14h7v7l9-11h-7z" label="Command Center" />
+          <NavItem active={currentView === 'INVENTORY'} onClick={() => setCurrentView('INVENTORY')} icon="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" label="Inventory Matrix" />
+          <NavItem active={currentView === 'ORDERS'} onClick={() => setCurrentView('ORDERS')} icon="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" label="Supply Orders" />
+          
+          {canAccessView('ALERTS') && (
+            <NavItem active={currentView === 'ALERTS'} onClick={() => setCurrentView('ALERTS')} icon="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" label="Critical Alerts" />
+          )}
+
+          {canAccessView('ANALYTICS') && (
+            <NavItem active={currentView === 'ANALYTICS'} onClick={() => setCurrentView('ANALYTICS')} icon="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" label="Data Neural" />
+          )}
+        </nav>
+
+        <div className="p-6 border-t border-[#00f0ff]/5">
+          <div className="mb-4">
+            <span className="text-[9px] text-gray-500 uppercase tracking-widest block mb-2">Access Authority</span>
+            <select 
+              value={currentRole} 
+              onChange={(e) => {
+                const newRole = e.target.value as Role;
+                setCurrentRole(newRole);
+                if (newRole === 'STAFF' && restrictedViews.includes(currentView)) {
+                  setCurrentView('DASHBOARD');
+                }
+              }}
+              className="w-full bg-[#12121a] border border-[#00f0ff]/20 text-[10px] text-[#00f0ff] px-2 py-1.5 focus:outline-none focus:border-[#00f0ff]"
+            >
+              <option value="STAFF">STAFF ACCESS</option>
+              <option value="SUPERVISOR">SUPERVISOR ACCESS</option>
+              <option value="MANAGER">MANAGER AUTHORITY</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-[#00f0ff] animate-pulse"></div>
+            <span className="text-[10px] text-gray-400 uppercase tracking-widest">{currentRole} ACTIVE</span>
+          </div>
         </div>
-      </div>
-      <div className="flex items-center gap-4 text-xs tracking-widest">
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00f0ff] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00f0ff]"></span>
-          </span>
-          <span className="text-[#00f0ff]">SYSTEM ONLINE</span>
-        </div>
-        <span className="text-gray-500">|</span>
-        <span className="text-gray-400">SESSION: 8X-990</span>
-      </div>
-    </header>
+      </aside>
 
-    {/* Main Grid */}
-    <main className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-[1600px] mx-auto">
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col relative overflow-hidden">
+        
+        {/* Background Decorative Elements */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00f0ff]/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#ff0000]/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
 
-      {/* Left Col: QR Scanner Simulator */}
-      <section className="lg:col-span-1 space-y-6">
-        <div className="bg-[#12121a] border border-[#00f0ff]/20 rounded-lg p-6 relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00f0ff] to-transparent opacity-50"></div>
-
-          <h2 className="text-[#00f0ff] text-sm uppercase tracking-widest mb-6 flex items-center gap-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="square" strokeWidth="2" d="M3 10v4M21 10v4M10 3h4M10 21h4m-8-5v2a2 2 0 002 2h2m4-14h2a2 2 0 012 2v2M6 3H4a2 2 0 00-2 2v2"></path></svg>
-            QR Scanner Relay
-          </h2>
-
-          {/* Scanner Viewport */}
-          <div className="relative aspect-square bg-[#08080c] border border-gray-800 rounded flex items-center justify-center mb-6 overflow-hidden">
-            {scanning ? (
-              <>
-                <div className="absolute inset-0 bg-[#00f0ff]/5 animate-pulse"></div>
-                <div className="w-full h-0.5 bg-[#00f0ff] absolute top-1/2 left-0 shadow-[0_0_10px_#00f0ff] animate-[scan_1s_ease-in-out_infinite]"></div>
-                <p className="text-[#00f0ff] text-xs tracking-widest animate-pulse z-10">AWAITING READ...</p>
-              </>
-            ) : (
-              <p className="text-gray-600 text-xs tracking-widest">SENSOR STANDBY</p>
-            )}
-
-            {/* Corner Markers */}
-            <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-[#00f0ff]/50"></div>
-            <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-[#00f0ff]/50"></div>
-            <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-[#00f0ff]/50"></div>
-            <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-[#00f0ff]/50"></div>
+        {/* Top Header */}
+        <header className="h-20 border-b border-[#00f0ff]/10 flex items-center justify-between px-10 bg-[#08080c]/50 backdrop-blur-xl">
+          <div className="flex flex-col">
+            <h2 className="text-xs uppercase tracking-[0.4em] text-[#00f0ff]">Neural Interface</h2>
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold text-white">{currentView}</span>
+              <span className="text-[10px] px-2 py-0.5 rounded border border-[#00f0ff]/20 text-[#00f0ff] bg-[#00f0ff]/5">REAL-TIME</span>
+            </div>
           </div>
 
-          <button
-            onClick={handleSimulateScan}
-            disabled={scanning}
-            className={`w-full py-4 text-sm font-bold tracking-widest uppercase transition-all duration-300 border ${scanning
-                ? 'bg-transparent border-gray-700 text-gray-500 cursor-not-allowed'
-                : 'bg-[#00f0ff]/10 border-[#00f0ff] text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black hover:shadow-[0_0_20px_rgba(0,240,255,0.4)]'
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={simulateScan}
+              disabled={isScanning}
+              className={`flex items-center gap-2 px-4 py-2 border text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+                isScanning 
+                ? 'border-gray-700 text-gray-600' 
+                : 'border-[#00f0ff] text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black shadow-[0_0_15px_rgba(0,240,255,0.2)]'
               }`}
-          >
-            {scanning ? 'Processing...' : 'Simulate QR Scan'}
-          </button>
-
-          {/* Terminal Output */}
-          <div className="mt-6 bg-black border border-gray-800 p-4 rounded h-24 overflow-hidden">
-            <p className="text-gray-500 text-xs mb-1">&gt; _System Log</p>
-            {scanResult && (
-              <p className="text-[#00f0ff] text-xs">[{new Date().toLocaleTimeString()}] {scanResult}</p>
-            )}
+            >
+              <svg className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+              {isScanning ? 'Processing...' : 'Neural Scan Item'}
+            </button>
           </div>
+        </header>
+
+        {/* Dynamic Viewport */}
+        <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+          
+          {currentView === 'DASHBOARD' && (
+            <div className="space-y-10 animate-fade-in">
+              {/* Stats HUD */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <StatCard label="Total Assets" value={stats.totalItems} trend="+12% / mo" color="#00f0ff" />
+                <StatCard label="Neural Alerts" value={stats.criticalItems} trend="Action Required" color="#ff0000" />
+                <StatCard label="Inventory Valuation" value={`LKR ${stats.stockValue.toLocaleString()}`} trend="Real-time Sync" color="#00f0ff" />
+              </div>
+
+              {/* Central Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Live Scan Log */}
+                <div className="bg-[#0c0c14] border border-[#00f0ff]/10 rounded-lg overflow-hidden flex flex-col">
+                  <div className="px-6 py-4 border-b border-[#00f0ff]/10 flex justify-between items-center bg-[#11111a]">
+                    <span className="text-[10px] font-bold tracking-[0.2em] text-[#00f0ff] uppercase">Scan Telemetry</span>
+                    <div className="flex gap-1">
+                      <div className="w-1 h-1 bg-[#00f0ff]"></div>
+                      <div className="w-1 h-1 bg-[#00f0ff]/50"></div>
+                      <div className="w-1 h-1 bg-[#00f0ff]/20"></div>
+                    </div>
+                  </div>
+                  <div className="p-6 h-[300px] overflow-hidden flex flex-col justify-end space-y-3 font-mono text-xs">
+                    {scanLog.map((log, i) => (
+                      <div key={i} className="flex items-center gap-3 opacity-80" style={{ opacity: 1 - (i * 0.15) }}>
+                        <span className="text-[#00f0ff] font-bold">&gt;&gt;</span>
+                        <span className={log.includes('Scanned') ? 'text-white' : 'text-gray-500'}>{log}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Categories */}
+                <div className="bg-[#0c0c14] border border-[#00f0ff]/10 rounded-lg p-6">
+                  <h3 className="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-8">Asset Categorization</h3>
+                  <div className="space-y-6">
+                    <ProgressBar label="Kitchenware" percent={65} color="#00f0ff" />
+                    <ProgressBar label="Home Essentials" percent={42} color="#0066ff" />
+                    <ProgressBar label="Outdoor Supply" percent={88} color="#00f0ff" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentView === 'INVENTORY' && (
+            <div className="animate-fade-in space-y-6">
+               <div className="bg-[#0c0c14] border border-[#00f0ff]/10 rounded-lg overflow-hidden">
+                  <table className="w-full text-left text-[10px] uppercase tracking-wider">
+                    <thead>
+                      <tr className="bg-[#11111a] border-b border-[#00f0ff]/20">
+                        <th className="px-6 py-4 font-bold text-[#00f0ff]">Asset ID</th>
+                        <th className="px-6 py-4 font-bold text-[#00f0ff]">Nomenclature</th>
+                        <th className="px-6 py-4 font-bold text-[#00f0ff]">Category</th>
+                        <th className="px-6 py-4 font-bold text-[#00f0ff] text-right">Quantity</th>
+                        <th className="px-6 py-4 font-bold text-[#00f0ff]">Status</th>
+                        <th className="px-6 py-4 font-bold text-[#00f0ff] text-right">Unit Price</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#00f0ff]/5">
+                      {inventory.map(product => (
+                        <tr key={product.id} className="hover:bg-[#00f0ff]/5 transition-colors group">
+                          <td className="px-6 py-5 text-gray-400 group-hover:text-[#00f0ff]">{product.id}</td>
+                          <td className="px-6 py-5 font-bold text-white">{product.name}</td>
+                          <td className="px-6 py-5 text-gray-500">{product.category}</td>
+                          <td className="px-6 py-5 text-right font-bold tabular-nums text-white">{product.quantity}</td>
+                          <td className="px-6 py-5">
+                            <span className={`px-2 py-0.5 rounded-sm text-[8px] font-black tracking-widest border ${
+                              product.status === 'optimal' ? 'bg-[#00f0ff]/10 border-[#00f0ff]/40 text-[#00f0ff]' :
+                              product.status === 'warning' ? 'bg-yellow-500/10 border-yellow-500/40 text-yellow-500' :
+                              'bg-[#ff0000]/10 border-[#ff0000]/40 text-[#ff0000] animate-pulse'
+                            }`}>
+                              {product.status.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="px-6 py-5 text-right tabular-nums text-gray-400">LKR {product.price.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+               </div>
+            </div>
+          )}
+
+          {currentView === 'ALERTS' && (
+            <div className="animate-fade-in space-y-6">
+               <h3 className="text-xs font-bold tracking-[0.3em] text-[#ff0000] uppercase mb-4">Neural Warning Relay</h3>
+               <div className="grid grid-cols-1 gap-4">
+                  {inventory.filter(p => p.status !== 'optimal').map(p => (
+                    <div key={p.id} className="bg-[#1a0a0a] border border-[#ff0000]/20 p-6 rounded-lg flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-[#ff0000]/10 border border-[#ff0000]/30 rounded flex items-center justify-center">
+                          <svg className="w-6 h-6 text-[#ff0000]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">{p.name}</p>
+                          <p className="text-[10px] text-[#ff0000] uppercase tracking-widest">CRITICAL LOW STOCK: {p.quantity} UNITS REMAINING</p>
+                        </div>
+                      </div>
+                      <button className="px-4 py-2 bg-[#ff0000]/10 border border-[#ff0000] text-[#ff0000] text-[10px] font-bold uppercase tracking-widest hover:bg-[#ff0000] hover:text-black transition-all">GENERATE P.O.</button>
+                    </div>
+                  ))}
+               </div>
+            </div>
+          )}
+
         </div>
-      </section>
+      </main>
 
-      {/* Right Col: Live Inventory Matrix */}
-      <section className="lg:col-span-2 space-y-6">
-        <div className="bg-[#12121a] border border-[#00f0ff]/20 rounded-lg p-6 h-full">
-          <div className="flex justify-between items-end mb-6">
-            <h2 className="text-[#00f0ff] text-sm uppercase tracking-widest flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="square" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
-              Live Inventory Matrix
-            </h2>
-            <span className="text-xs text-gray-500 tracking-widest">SYNC: AUTO</span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-gray-800 text-gray-500 text-xs uppercase tracking-widest">
-                  <th className="py-4 px-4 font-normal">Asset ID</th>
-                  <th className="py-4 px-4 font-normal">Nomenclature</th>
-                  <th className="py-4 px-4 font-normal text-right">Qty</th>
-                  <th className="py-4 px-4 font-normal">Status</th>
-                  <th className="py-4 px-4 font-normal text-right">Last Sync</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {inventory.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-800/50 hover:bg-[#00f0ff]/5 transition-colors">
-                    <td className="py-4 px-4 text-gray-300">{item.id}</td>
-                    <td className="py-4 px-4 text-white">{item.name}</td>
-                    <td className="py-4 px-4 text-right font-bold tabular-nums">
-                      {item.quantity.toString().padStart(3, '0')}
-                    </td>
-                    <td className="py-4 px-4">
-                      {item.status === 'optimal' && <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/20">OPTIMAL</span>}
-                      {item.status === 'low' && <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">LOW YIELD</span>}
-                      {item.status === 'out' && <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-[#ff0000]/10 text-[#ff0000] border border-[#ff0000]/20 animate-pulse">CRITICAL</span>}
-                    </td>
-                    <td className="py-4 px-4 text-right text-gray-500 tabular-nums text-xs">
-                      {item.lastUpdated}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-    </main>
-
-    {/* Global CSS for Animations */}
-    <style dangerouslySetInnerHTML={{
-      __html: `
-        @keyframes scan {
-          0% { top: 0; opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { top: 100%; opacity: 0; }
-        }
+      <style dangerouslySetInnerHTML={{__html: `
+        @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;400;700;900&display=swap');
+        
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #050508; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #00f0ff22; border-radius: 10px; }
       `}} />
-  </div>
+    </div>
+  );
+}
+
+// --- Sub-components ---
+
+function NavItem({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: string; label: string }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded transition-all duration-300 group relative ${
+        active ? 'bg-[#00f0ff]/10 text-[#00f0ff]' : 'text-gray-500 hover:text-gray-300'
+      }`}
+    >
+      {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#00f0ff] rounded-r shadow-[0_0_10px_#00f0ff]"></div>}
+      <svg className={`w-4 h-4 transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={icon}></path>
+      </svg>
+      <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{label}</span>
+    </button>
+  );
+}
+
+function StatCard({ label, value, trend, color }: { label: string; value: string | number; trend: string; color: string }) {
+  return (
+    <div className="bg-[#0c0c14] border border-[#00f0ff]/10 p-6 rounded-lg relative overflow-hidden group">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-transparent to-[#00f0ff]/5 rotate-45 -mr-10 -mt-10"></div>
+      <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-gray-500 mb-2">{label}</p>
+      <h3 className="text-xl font-bold text-white mb-2 tabular-nums" style={{ color: color }}>{value}</h3>
+      <p className="text-[8px] font-bold tracking-widest text-gray-600 uppercase">{trend}</p>
+    </div>
+  );
+}
+
+function ProgressBar({ label, percent, color }: { label: string; percent: number; color: string }) {
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest text-gray-500">
+        <span>{label}</span>
+        <span>{percent}%</span>
+      </div>
+      <div className="w-full h-1 bg-gray-900 rounded-full overflow-hidden">
+        <div className="h-full transition-all duration-1000 ease-out" style={{ width: `${percent}%`, backgroundColor: color, boxShadow: `0 0 10px ${color}` }}></div>
+      </div>
+    </div>
   );
 }

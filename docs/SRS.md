@@ -12,7 +12,7 @@ This proposed **Automated Inventory Tracking System** is engineered to eradicate
 
 ## 2. SDLC Model: The Incremental Model
 
-The development of the Mistravora Core system explicitly follows the **Incremental Model**. 
+The development of the RT & DK Core system explicitly follows the **Incremental Model**. 
 
 This approach is best suited for RT & DK Consumers because it allows the development of the most important features first (e.g., barcode scanning, real-time stock updates, and low-stock alerts) so the system can start providing value quickly. Additional features (like advanced reporting) can be added in later increments, making it easier and less expensive to adapt to any necessary changes over time.
 

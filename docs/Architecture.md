@@ -2,7 +2,7 @@
 
 ## 1. High-Level Architecture Overview
 
-The Mistravora Core system utilizes a decoupled, modern architecture designed to support the real-time demands of **RT & DK Consumers (Pvt) Ltd**. Detailed visual representations can be found in the `/diagrams` directory:
+The RT & DK Core system utilizes a decoupled, modern architecture designed to support the real-time demands of **RT & DK Consumers (Pvt) Ltd**. Detailed visual representations can be found in the `/diagrams` directory:
 
 - **Context DFD:** `../diagrams/Context_DFD.svg` - Maps the system boundary and external entities (Customer, Supplier, Manager).
 - **UML Class Diagram:** `../diagrams/UML_Class_Diagram.svg` - Details the object-oriented structure (Product, Customer, Supplier, Sales Order, Order Item, User).
